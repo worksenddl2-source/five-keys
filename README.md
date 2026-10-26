@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 다섯 열쇠 리딩
 
-## Getting Started
+MBTI, 혈액형, 키, 나이를 입력하고 타로 카드 3장을 뽑으면, 다섯 가지를 하나로 엮은 리딩을 보여주는 웹앱입니다.
+결과마다 배경과 안내자 캐릭터가 달라지고, 무거운 카드가 나오면 화면도 어두워집니다.
 
-First, run the development server:
+**사이트 주소**: https://worksenddl2-source.github.io/five-keys/
+
+## 다섯 개의 열쇠
+
+| 입력 | 열쇠 | 결과에서 정하는 것 |
+| --- | --- | --- |
+| MBTI (모름 가능) | 기질 | 분석가(NT)·외교관(NF)·관리자(SJ)·탐험가(SP) 안내자 캐릭터, 성격 리딩, 화면 기본 색 |
+| 혈액형 (모름 가능) | 관계 | 관계 스타일 리딩, 행운 아이템 |
+| 키 | 시선 | 배경 지평선 높이(키의 약 93%인 눈높이에 맞춤), 행운의 숫자 |
+| 나이 | 계절 | 인생의 계절(봄 ~19세, 여름 20~34세, 가을 35~54세, 겨울 55세~)과 배경에 날리는 꽃잎·반딧불·낙엽·눈 |
+| 타로 3장 | 카드 | 과거·현재·미래 리딩, 화면 분위기(밝음·황혼·어둠), 하늘에 뜨는 현재 카드의 상징 |
+
+- **타로**: 메이저 아르카나 22장을 섞어 사용자가 직접 3장을 고릅니다. 각 카드는 30% 확률로 역방향이 나옵니다.
+- **분위기**: 카드마다 밝음·보통·무거움 점수를 매기고 현재 카드에 두 배 가중치를 둡니다. 무작위 2,000회 시뮬레이션에서 밝음 45%, 황혼 36%, 어둠 19%가 나왔습니다.
+- **조화 지수**: MBTI 기질을 원소(NT 바람, NF 물, SJ 흙, SP 불)로 바꾸고, 뽑은 카드의 원소와 맞춰 0~100점으로 계산합니다.
+- 키와 나이는 평가하지 않고 풍경과 비유로만 씁니다. 입력값은 브라우저 밖으로 저장·전송하지 않습니다.
+
+## 실행 방법
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # 개발 서버: http://localhost:3000
+npm run build:html   # 서버 없이 열리는 HTML 한 장 만들기: dist/index.html
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`master` 브랜치에 push하면 GitHub Actions(`.github/workflows/pages.yml`)가 `dist/index.html`을 만들어 GitHub Pages에 자동으로 배포합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 폴더 구조
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 경로 | 역할 |
+| --- | --- |
+| `src/lib/tarot.ts` | 메이저 아르카나 22장 데이터 (원소, 무게, 정·역방향 해석) |
+| `src/lib/profile.ts` | MBTI 16유형과 4기질, 혈액형, 인생의 계절, 눈높이·행운의 숫자 |
+| `src/lib/reading.ts` | 카드 섞기, 분위기·조화 지수 계산, 리딩 문장 조합 |
+| `src/lib/theme.ts` | 기질 5(모름 포함) × 분위기 3 = 15가지 색 조합 |
+| `src/components/App.tsx` | 입력 → 카드 뽑기 → 결과 화면 |
+| `src/components/CardArt.tsx` | 타로 카드 앞·뒷면과 22장의 상징 SVG |
+| `src/components/Guide.tsx` | 기질별 안내자 캐릭터 SVG (현자·시인·등불지기·방랑자·길잡이) |
+| `src/components/Scene.tsx` | 결과 배경 SVG (하늘, 카드 상징, 지평선, 계절 입자, 안개) |
+| `src/standalone/main.tsx` | 서버 없이 동작하는 HTML 버전의 진입점 |
+| `scripts/build-standalone.mjs` | 사이트 전체를 `dist/index.html` 한 파일로 묶는 스크립트 |
 
-## Learn More
+## 알려진 한계
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 카드·캐릭터·배경은 직접 그린 단순한 SVG입니다.
+- 혈액형 성격론은 과학적 근거가 없어 “재미로 보는 관계 스타일”로만 표시합니다.
+- 모든 리딩은 재미로 보는 참고용 콘텐츠입니다.
